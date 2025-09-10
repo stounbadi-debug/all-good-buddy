@@ -1,5 +1,3 @@
-I'll analyze your project structure to give you a comprehensive description.
-
 # **CineDiscover - AI-Powered Movie & TV Discovery Platform**
 
 ## **Project Overview**
