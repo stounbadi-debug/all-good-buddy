@@ -1,73 +1,85 @@
-# Welcome to your Lovable project
+I'll analyze your project structure to give you a comprehensive description.
 
-## Project info
+# **CineDiscover - AI-Powered Movie & TV Discovery Platform**
 
-**URL**: https://lovable.dev/projects/5bb314a5-c46e-4c86-8738-f9b32c64f08a
+## **Project Overview**
+CineDiscover is a sophisticated React-based web application that revolutionizes how users discover movies and TV shows. It combines AI-powered recommendations with real-time data from The Movie Database (TMDB) API to create an intelligent entertainment discovery platform.
 
-## How can I edit this code?
+## **Key Features**
 
-There are several ways of editing your application.
+### 🤖 **AI-Powered Discovery Engine**
+- **Gemini AI Integration**: Uses Google's Gemini AI for intelligent content analysis and recommendations
+- **Natural Language Processing**: Users can describe movies with phrases like "movie about a man who ages backwards" and get accurate results
+- **Mood-Based Recommendations**: Suggests content based on emotional preferences (dark, uplifting, thoughtful, exciting)
+- **Smart Similarity Engine**: Finds similar movies based on genre, ratings, and thematic elements
 
-**Use Lovable**
+### 🎬 **Comprehensive Movie Database**
+- **TMDB Integration**: Access to 1M+ movies and TV shows via The Movie Database API
+- **Real-Time Search**: Instant search across the entire TMDB library
+- **Advanced Filtering**: Filter by genre, rating, release year, and popularity
+- **Detailed Movie Information**: Comprehensive metadata including ratings, cast, plot summaries, and trailers
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5bb314a5-c46e-4c86-8738-f9b32c64f08a) and start prompting.
+### 🎯 **Intelligent User Experience**
+- **Surprise Me Feature**: Random movie discovery for adventurous viewers
+- **Featured Movie Spotlight**: Highlights exceptional content with detailed presentations
+- **Personal Favorites**: Save and manage your favorite movies and shows
+- **Responsive Design**: Beautiful, mobile-first interface with smooth animations
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🎨 **Modern Design System**
+- **Glassmorphism UI**: Sleek, modern interface with backdrop blur effects
+- **Dark/Light Mode**: Seamless theme switching with proper contrast ratios
+- **Gradient Animations**: Eye-catching visual effects and smooth transitions
+- **Semantic Design Tokens**: Consistent color system using HSL values and CSS variables
 
-**Use your preferred IDE**
+## **Technical Architecture**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### **Frontend Stack**
+- **React 18** with TypeScript for type-safe development
+- **Vite** for lightning-fast development and optimized builds
+- **Tailwind CSS** with custom design system and semantic tokens
+- **Shadcn/ui** components for consistent, accessible UI elements
+- **React Router** for client-side navigation
+- **TanStack Query** for efficient API state management
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### **Backend Integration**
+- **TMDB API**: Real-time movie and TV show data
+- **Gemini AI API**: Advanced natural language processing for recommendations
+- **Fallback System**: Local AI engine as backup when external APIs fail
 
-Follow these steps:
+### **Key Components Architecture**
+- **Landing Page**: Marketing homepage with feature showcase
+- **Main App**: Tabbed interface (Discover vs AI Recommendations)
+- **Movie Grid**: Responsive card layout with lazy loading
+- **AI Recommendations**: Natural language query interface
+- **Enhanced Movie Cards**: Rich movie information with actions
+- **Floating Action Button**: Quick access to key features
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## **Core Functionality**
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### **Search Capabilities**
+- Traditional keyword search through TMDB
+- AI-powered natural language queries
+- Multi-format support (movies, TV shows, people)
+- Advanced filtering and sorting options
 
-# Step 3: Install the necessary dependencies.
-npm i
+### **Recommendation Engine**
+- **AI Analysis**: Processes user descriptions to find matching content
+- **Similarity Matching**: Finds movies similar to user favorites  
+- **Mood Detection**: Interprets emotional preferences from queries
+- **Confidence Scoring**: Provides accuracy ratings for recommendations
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+### **User Interface Features**
+- **Skeleton Loading**: Smooth loading states during API calls
+- **Toast Notifications**: User feedback for all actions
+- **Modal Dialogs**: Detailed movie information overlays
+- **Infinite Scroll**: Seamless browsing through large result sets
 
-**Edit a file directly in GitHub**
+## **Project Structure**
+The codebase is well-organized with clear separation of concerns:
+- **Components**: Reusable UI components with proper TypeScript interfaces
+- **Pages**: Main application views (Landing, Index, NotFound)
+- **Libraries**: Service layers for TMDB API, AI engine, and utilities
+- **Hooks**: Custom React hooks for common functionality
+- **Design System**: Centralized styling with Tailwind configuration
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/5bb314a5-c46e-4c86-8738-f9b32c64f08a) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This is a production-ready entertainment discovery platform that showcases modern web development best practices, AI integration, and exceptional user experience design.
