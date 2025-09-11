@@ -245,32 +245,67 @@ class TMDBService {
     };
   }
 
-  async advancedSearch(keywords: string[], genres?: number[], year?: number): Promise<TMDBResponse> {
+  async advancedSearch(
+    keywords: string[],
+    genres?: number[],
+    options?: { fromYear?: number; toYear?: number; mediaType?: 'movie' | 'tv' | 'both' }
+  ): Promise<TMDBResponse> {
     try {
-      // Try multiple search strategies
-      const searchPromises = [];
-      
-      // 1. Direct title search with each keyword
+      const searchPromises: Promise<any>[] = [];
+
+      // 1) Direct title/multi searches for top keywords (broad)
       for (const keyword of keywords.slice(0, 3)) {
         searchPromises.push(this.searchMovies(keyword));
         searchPromises.push(this.searchMulti(keyword));
       }
 
-      // 2. Combined keywords search
+      // 2) Combined keywords search
       if (keywords.length > 1) {
         const combinedQuery = keywords.slice(0, 3).join(' ');
         searchPromises.push(this.searchMovies(combinedQuery));
         searchPromises.push(this.searchMulti(combinedQuery));
       }
 
-      // 3. Genre-based discovery if genres provided
+      // 3) Discover with filters (precise)
+      const mediaType = options?.mediaType || 'both';
+
+      // Movies discover
+      if (mediaType === 'movie' || mediaType === 'both') {
+        const movieDiscoverParams: Record<string, string | number> = {
+          page: 1,
+          language: 'en-US',
+          sort_by: 'popularity.desc',
+          include_adult: 'false',
+          'vote_count.gte': 50,
+        };
+        if (genres && genres.length > 0) movieDiscoverParams.with_genres = genres.join(',');
+        if (options?.fromYear) movieDiscoverParams['primary_release_date.gte'] = `${options.fromYear}-01-01`;
+        if (options?.toYear) movieDiscoverParams['primary_release_date.lte'] = `${options.toYear}-12-31`;
+        searchPromises.push(this.makeRequest('/discover/movie', movieDiscoverParams));
+      }
+
+      // TV discover
+      if (mediaType === 'tv' || mediaType === 'both') {
+        const tvDiscoverParams: Record<string, string | number> = {
+          page: 1,
+          language: 'en-US',
+          sort_by: 'popularity.desc',
+          'vote_count.gte': 50,
+        };
+        if (genres && genres.length > 0) tvDiscoverParams.with_genres = genres.join(',');
+        if (options?.fromYear) tvDiscoverParams['first_air_date.gte'] = `${options.fromYear}-01-01`;
+        if (options?.toYear) tvDiscoverParams['first_air_date.lte'] = `${options.toYear}-12-31`;
+        searchPromises.push(this.makeRequest('/discover/tv', tvDiscoverParams));
+      }
+
+      // 4) Genre-only discovery as backup
       if (genres && genres.length > 0) {
         searchPromises.push(this.getMoviesByGenre(genres[0]));
       }
 
       // Execute all searches in parallel
       const results = await Promise.all(searchPromises);
-      
+
       // Combine and deduplicate results
       const allMovies: Movie[] = [];
       const seenIds = new Set<number>();
@@ -279,17 +314,16 @@ class TMDBService {
         if (result.results) {
           for (const movie of result.results) {
             if (!seenIds.has(movie.id) && movie.media_type !== 'person') {
-              // Convert TV shows to movie format for consistency
-              if (movie.media_type === 'tv' || movie.first_air_date) {
+              if (movie.media_type === 'tv' || (movie as any).first_air_date) {
                 const convertedMovie: Movie = {
-                  ...movie,
-                  title: movie.name || movie.title,
-                  release_date: movie.first_air_date || movie.release_date,
-                  genre_ids: movie.genre_ids || []
+                  ...(movie as any),
+                  title: (movie as any).name || movie.title,
+                  release_date: (movie as any).first_air_date || movie.release_date,
+                  genre_ids: movie.genre_ids || [],
                 };
                 allMovies.push(convertedMovie);
               } else if (movie.media_type === 'movie' || movie.release_date) {
-                allMovies.push(movie);
+                allMovies.push(movie as Movie);
               }
               seenIds.add(movie.id);
             }
@@ -297,8 +331,21 @@ class TMDBService {
         }
       }
 
-      // Sort by relevance (popularity and vote average)
-      allMovies.sort((a, b) => {
+      // Year filter (safety) if provided
+      const fromYear = options?.fromYear;
+      const toYear = options?.toYear;
+      const filteredByYear = (fromYear || toYear)
+        ? allMovies.filter((m) => {
+            const year = parseInt((m.release_date || '').slice(0, 4), 10);
+            if (!year) return false;
+            if (fromYear && year < fromYear) return false;
+            if (toYear && year > toYear) return false;
+            return true;
+          })
+        : allMovies;
+
+      // Sort by relevance
+      filteredByYear.sort((a, b) => {
         const scoreA = (a.popularity || 0) * 0.7 + (a.vote_average || 0) * 0.3;
         const scoreB = (b.popularity || 0) * 0.7 + (b.vote_average || 0) * 0.3;
         return scoreB - scoreA;
@@ -306,14 +353,12 @@ class TMDBService {
 
       return {
         page: 1,
-        results: allMovies.slice(0, 20), // Return top 20 results
-        total_pages: Math.ceil(allMovies.length / 20),
-        total_results: allMovies.length
+        results: filteredByYear.slice(0, 20),
+        total_pages: Math.ceil(filteredByYear.length / 20),
+        total_results: filteredByYear.length,
       };
-
     } catch (error) {
       console.error('Advanced search failed:', error);
-      // Fallback to simple search
       if (keywords.length > 0) {
         return this.searchMovies(keywords[0]);
       }

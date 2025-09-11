@@ -121,7 +121,22 @@ class GeminiAIService {
 
       // Enhanced search strategy
       let movies: Movie[] = [];
-      
+      // Map era to a concrete year range for precise filtering
+      const eraStr = String(aiAnalysis.era || '').toLowerCase();
+      let fromYear: number | undefined;
+      let toYear: number | undefined;
+      const decadeMatch = eraStr.match(/^(19|20)\d0s$/);
+      if (decadeMatch) {
+        const start = parseInt(eraStr.slice(0, 4), 10);
+        fromYear = start;
+        toYear = start + 9;
+      } else if (eraStr === 'recent') {
+        const now = new Date().getFullYear();
+        fromYear = now - 7;
+        toYear = now;
+      } else if (eraStr === 'classic') {
+        toYear = 1989;
+      }
       // 1. First try exact title matches if provided
       if (aiAnalysis.exact_titles && aiAnalysis.exact_titles.length > 0) {
         for (const title of aiAnalysis.exact_titles.slice(0, 2)) {
@@ -156,15 +171,28 @@ class GeminiAIService {
         ];
 
         const genreIds = (aiAnalysis.genres || []).map((g: string) => this.genreMap[g.toLowerCase()]).filter(Boolean);
+
+        const mediaType: 'movie' | 'tv' | 'both' = (aiAnalysis.media_type === 'movie' || aiAnalysis.media_type === 'tv') ? aiAnalysis.media_type : 'both';
         
-        const advancedResults = await tmdbService.advancedSearch(allKeywords, genreIds);
+        const advancedResults = await tmdbService.advancedSearch(allKeywords, genreIds, { fromYear, toYear, mediaType });
         movies.push(...advancedResults.results.slice(0, 12 - movies.length));
       }
 
       // 3. Remove duplicates
-      const uniqueMovies = movies.filter((movie, index, self) => 
+      let uniqueMovies = movies.filter((movie, index, self) => 
         index === self.findIndex(m => m.id === movie.id)
       );
+
+      // 3b. Apply era year filtering when available
+      if ((fromYear || toYear) && uniqueMovies.length > 0) {
+        uniqueMovies = uniqueMovies.filter((m) => {
+          const y = parseInt((m.release_date || '').slice(0, 4), 10);
+          if (!y) return false;
+          if (fromYear && y < fromYear) return false;
+          if (toYear && y > toYear) return false;
+          return true;
+        });
+      }
 
       // 4. Fallback if still no results
       if (uniqueMovies.length === 0) {
