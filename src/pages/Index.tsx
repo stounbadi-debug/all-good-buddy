@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Brain, Sparkles, Filter, Zap } from "lucide-react";
@@ -10,12 +10,14 @@ import FeaturedMovie from "@/components/FeaturedMovie";
 import AIRecommendations from "@/components/AIRecommendations";
 import MovieFilters from "@/components/MovieFilters";
 import FloatingActionButton from "@/components/FloatingActionButton";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { Movie, tmdbService } from "@/lib/tmdb";
 import { aiRecommendationEngine } from "@/lib/ai-recommendations";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
 const Index = () => {
   const [searchParams] = useSearchParams();
-  const [movies, setMovies] = useState<Movie[]>([]);
+  const [initialMovies, setInitialMovies] = useState<Movie[]>([]);
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
   const [featuredMovie, setFeaturedMovie] = useState<Movie | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,6 +26,18 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("discover");
   const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
+
+  // Use infinite scroll hook
+  const { 
+    movies, 
+    isLoadingMore, 
+    hasMorePages, 
+    setMovies 
+  } = useInfiniteScroll({
+    initialMovies,
+    searchQuery,
+    currentView
+  });
 
   // Load trending movies on initial load or handle search from URL
   useEffect(() => {
@@ -40,7 +54,7 @@ const Index = () => {
     setCurrentView("trending");
     try {
       const response = await tmdbService.getTrendingMovies('week');
-      setMovies(response.results);
+      setInitialMovies(response.results);
       setFilteredMovies(response.results);
       setFeaturedMovie(null);
     } catch (error) {
@@ -65,7 +79,7 @@ const Index = () => {
     
     try {
       const response = await tmdbService.searchMovies(query);
-      setMovies(response.results);
+      setInitialMovies(response.results);
       setFilteredMovies(response.results);
       
       if (response.results.length === 0) {
@@ -94,7 +108,7 @@ const Index = () => {
       const randomMovie = await tmdbService.getRandomMovie();
       if (randomMovie) {
         setFeaturedMovie(randomMovie);
-        setMovies([]);
+        setInitialMovies([]);
         toast({
           title: "🎬 Surprise!",
           description: `Check out "${randomMovie.title}" - your featured pick!`,
@@ -117,7 +131,7 @@ const Index = () => {
   };
 
   const handleAIMoviesFound = (aiMovies: Movie[], title: string) => {
-    setMovies(aiMovies);
+    setInitialMovies(aiMovies);
     setFilteredMovies(aiMovies);
     setCurrentView("ai");
     setFeaturedMovie(null);
@@ -127,7 +141,7 @@ const Index = () => {
     setIsLoading(true);
     try {
       const similarMovies = await aiRecommendationEngine.getSimilarMovies(movie);
-      setMovies(similarMovies);
+      setInitialMovies(similarMovies);
       setFilteredMovies(similarMovies);
       setCurrentView("ai");
       setFeaturedMovie(null);
@@ -163,6 +177,11 @@ const Index = () => {
     }
   };
 
+  // Memoize filtered movies based on current tab and view
+  const displayMovies = useMemo(() => {
+    return activeTab === "discover" ? filteredMovies : movies;
+  }, [activeTab, filteredMovies, movies]);
+
   return (
     <div className="min-h-screen particle-bg">
       <Navbar 
@@ -173,7 +192,7 @@ const Index = () => {
       
       <main className="relative">
         {/* Enhanced Navigation Tabs */}
-        <div className="container mx-auto px-6 pt-8">
+        <div className="container mx-auto px-4 sm:px-6 pt-8 max-w-7xl">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-center mb-8">
               <TabsList className="bg-gradient-card backdrop-blur-md border border-border/40 p-1 rounded-2xl shadow-glow">
@@ -204,16 +223,33 @@ const Index = () => {
               {(currentView !== "featured" || !featuredMovie) && (
                 <div className="animate-fade-in">
                   <MovieGrid 
-                    movies={filteredMovies}
+                    movies={displayMovies}
                     isLoading={isLoading}
                     title={getTitle()}
                     onSimilarMovies={(movies) => handleAIMoviesFound(movies, "Similar Movies")}
                   />
+                  
+                  {/* Infinite Scroll Loading */}
+                  {isLoadingMore && (
+                    <LoadingSpinner 
+                      text="Loading more movies..." 
+                      size="md" 
+                    />
+                  )}
+                  
+                  {/* End of results indicator */}
+                  {!isLoadingMore && !hasMorePages && movies.length > 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">
+                        🎬 You've seen all available movies!
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
               
               {/* Enhanced Empty State for First Load */}
-              {!isLoading && movies.length === 0 && !featuredMovie && currentView === "trending" && (
+              {!isLoading && displayMovies.length === 0 && !featuredMovie && currentView === "trending" && (
                 <div className="py-20 particle-bg">
                   <div className="text-center animate-scale-in">
                     <div className="text-9xl mb-8 animate-float">🎬</div>

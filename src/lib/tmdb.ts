@@ -349,13 +349,14 @@ class TMDBService {
     };
   }
 
-  async getTrendingMovies(timeWindow: 'day' | 'week' = 'week'): Promise<TMDBResponse> {
+  async getTrendingMovies(timeWindow: 'day' | 'week' = 'week', page: number = 1): Promise<TMDBResponse> {
     const response = await this.makeRequest(`/trending/movie/${timeWindow}`, {
+      page,
       language: 'en-US'
     });
 
     return {
-      page: response.page || 1,
+      page: response.page || page,
       results: response.results || [],
       total_pages: response.total_pages || 1,
       total_results: response.total_results || 0

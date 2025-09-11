@@ -142,6 +142,11 @@
     @apply bg-background text-foreground;
     background: var(--gradient-hero);
     min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  html {
+    overflow-x: hidden;
   }
 }
 

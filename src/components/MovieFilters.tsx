@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Filter, X, Calendar, Star, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,7 +54,7 @@ const MovieFilters = ({ movies, onFilteredMovies, isVisible, onToggle }: MovieFi
     new Set(movies.flatMap(movie => movie.genre_ids.map(id => genreMap[id]).filter(Boolean)))
   ).sort();
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...movies];
 
     // Genre filter
@@ -95,7 +95,12 @@ const MovieFilters = ({ movies, onFilteredMovies, isVisible, onToggle }: MovieFi
     });
 
     onFilteredMovies(filtered);
-  };
+  }, [movies, filters, onFilteredMovies, genreMap]);
+
+  // Auto-apply filters when they change
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
 
   const toggleGenre = (genre: string) => {
     setFilters(prev => ({
@@ -129,7 +134,7 @@ const MovieFilters = ({ movies, onFilteredMovies, isVisible, onToggle }: MovieFi
   }
 
   return (
-    <div className="fixed top-20 right-0 z-40 w-80 h-[calc(100vh-5rem)] bg-gradient-card backdrop-blur-md border-l border-border/40 p-6 overflow-y-auto animate-slide-in-right">
+    <div className="fixed top-20 right-0 z-40 w-80 max-w-[90vw] h-[calc(100vh-5rem)] bg-gradient-card backdrop-blur-md border-l border-border/40 p-6 overflow-y-auto animate-slide-in-right">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold gradient-text">Filters</h3>
         <div className="flex gap-2">
@@ -257,13 +262,10 @@ const MovieFilters = ({ movies, onFilteredMovies, isVisible, onToggle }: MovieFi
           </CardContent>
         </Card>
 
-        {/* Apply Filters Button */}
-        <Button
-          onClick={applyFilters}
-          className="w-full neon-button rounded-xl font-bold shadow-glow hover:shadow-elevated"
-        >
-          Apply Filters
-        </Button>
+        {/* Filter Status */}
+        <div className="text-center text-sm text-muted-foreground">
+          Filters apply automatically
+        </div>
       </div>
     </div>
   );
