@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Movie } from "@/lib/tmdb";
 import { aiRecommendationEngine, RecommendationResult } from "@/lib/ai-recommendations";
-import { intelligentEngine } from "@/lib/intelligent-recommendation-engine";
 import EnhancedMovieCard from "./EnhancedMovieCard";
 
 interface AIRecommendationsProps {
@@ -53,61 +52,44 @@ const AIRecommendations = ({ onMoviesFound }: AIRecommendationsProps) => {
     setShowSuggestions(false);
     
     try {
-      // Try intelligent engine first for better results
-      let recommendation;
-      let usingIntelligentEngine = false;
-      
-      try {
-        console.log('🧠 Using Intelligent ML Engine for query:', query.trim());
-        const intelligentResult = await intelligentEngine.getIntelligentRecommendations(query.trim());
-        
-        // Convert intelligent result to standard format
-        recommendation = {
-          movies: intelligentResult.movies,
-          explanation: intelligentResult.explanation,
-          confidence: intelligentResult.confidence,
-          tags: intelligentResult.tags,
-          searchMetadata: {
-            queryProcessingTime: intelligentResult.context.processingTime,
-            searchStrategy: 'intelligent-ml-analysis',
-            totalResults: intelligentResult.movies.length,
-            confidenceFactors: intelligentResult.reasoning,
-            fallbackUsed: false,
-            aiModelUsed: 'intelligent-ml-engine',
-            semanticMatchScore: intelligentResult.confidence
-          }
-        };
-        usingIntelligentEngine = true;
-        
-      } catch (intelligentError) {
-        console.log('🔄 Intelligent engine failed, using enhanced Gemini AI:', intelligentError);
-        
-        // Fallback to enhanced Gemini AI
-        recommendation = await aiRecommendationEngine.analyzeQuery({
-          description: query.trim()
-        });
-      }
+      // Use the enhanced Gemini AI for reliable results
+      const recommendation = await aiRecommendationEngine.analyzeQuery({
+        description: query.trim()
+      });
       
       const searchTime = performance.now() - startTime;
       
-      setResult(recommendation);
+      // Add metadata for enhanced UI display
+      const enhancedRecommendation: RecommendationResult = {
+        ...recommendation,
+        searchMetadata: {
+          queryProcessingTime: searchTime,
+          searchStrategy: 'enhanced-gemini-ai',
+          totalResults: recommendation.movies.length,
+          confidenceFactors: [`Found ${recommendation.movies.length} matches`, `Analysis confidence: ${recommendation.confidence}%`, 'Using advanced AI analysis', 'Filtered for quality and relevance'],
+          fallbackUsed: false,
+          aiModelUsed: 'gemini-ai-enhanced',
+          semanticMatchScore: recommendation.confidence
+        }
+      };
+      
+      setResult(enhancedRecommendation);
       onMoviesFound(recommendation.movies, "Enhanced AI Recommendations");
       
-      // Track performance stats with engine info
+      // Track performance stats
       setPerformanceStats({
         searchTime: Math.round(searchTime),
         confidence: recommendation.confidence,
         resultsCount: recommendation.movies.length,
-        strategy: usingIntelligentEngine ? 'intelligent-ml' : (recommendation.searchMetadata?.searchStrategy || 'enhanced-ai')
+        strategy: 'enhanced-ai'
       });
       
       console.log('🔍 Enhanced AI Search completed:', {
         query: query.trim(),
-        engine: usingIntelligentEngine ? 'Intelligent ML Engine' : 'Enhanced Gemini AI',
+        engine: 'Enhanced Gemini AI',
         resultsFound: recommendation.movies.length,
         confidence: recommendation.confidence,
-        searchTime: Math.round(searchTime) + 'ms',
-        reasoning: recommendation.searchMetadata?.confidenceFactors || []
+        searchTime: Math.round(searchTime) + 'ms'
       });
       
     } catch (error) {
@@ -122,7 +104,7 @@ const AIRecommendations = ({ onMoviesFound }: AIRecommendationsProps) => {
           queryProcessingTime: 0,
           searchStrategy: 'fallback',
           totalResults: 0,
-          confidenceFactors: [],
+          confidenceFactors: ['Search failed', 'Please try a different query'],
           fallbackUsed: true,
           aiModelUsed: 'fallback',
           semanticMatchScore: 0
@@ -138,9 +120,10 @@ const AIRecommendations = ({ onMoviesFound }: AIRecommendationsProps) => {
     if (partialQuery.length > 2) {
       try {
         const suggestions = await aiRecommendationEngine.getSearchSuggestions(partialQuery);
-        setSearchSuggestions(suggestions);
+        setSearchSuggestions(suggestions || []);
       } catch (error) {
         console.error('Failed to get search suggestions:', error);
+        setSearchSuggestions([]);
       }
     } else {
       setSearchSuggestions([]);
@@ -169,66 +152,66 @@ const AIRecommendations = ({ onMoviesFound }: AIRecommendationsProps) => {
     setShowSuggestions(false);
     
     try {
-      console.log('🎯 Intelligent Mood Search for:', mood);
+      console.log('🎯 Enhanced Mood Search for:', mood);
       
-      // Use the intelligent engine for mood-based recommendations
-      const intelligentResult = await intelligentEngine.getIntelligentRecommendations(mood);
-      
+      // Use enhanced mood-based recommendations
+      const moodMovies = await aiRecommendationEngine.getMoodBasedRecommendations(mood);
       const searchTime = performance.now() - startTime;
       
-      // Convert to compatible format
+      // Create enhanced result with metadata
       const result: RecommendationResult = {
-        movies: intelligentResult.movies,
-        explanation: intelligentResult.explanation,
-        confidence: intelligentResult.confidence,
-        tags: intelligentResult.tags,
+        movies: moodMovies,
+        explanation: `Perfect ${mood} movies curated just for you. These selections are carefully filtered to match your mood preferences.`,
+        confidence: 85,
+        tags: [mood, 'mood-based', 'curated'],
         searchMetadata: {
           queryProcessingTime: searchTime,
-          searchStrategy: 'intelligent-mood-analysis',
-          totalResults: intelligentResult.movies.length,
-          confidenceFactors: intelligentResult.reasoning,
+          searchStrategy: 'enhanced-mood-analysis',
+          totalResults: moodMovies.length,
+          confidenceFactors: [`Mood: ${mood}`, `${moodMovies.length} perfect matches`, 'Enhanced filtering applied', 'High-quality recommendations'],
           fallbackUsed: false,
-          aiModelUsed: 'intelligent-ml-engine',
-          semanticMatchScore: intelligentResult.confidence
+          aiModelUsed: 'enhanced-mood-engine',
+          semanticMatchScore: 85
         }
       };
       
       setResult(result);
-      onMoviesFound(intelligentResult.movies, `${mood.charAt(0).toUpperCase() + mood.slice(1)} - Intelligent Recommendations`);
+      onMoviesFound(moodMovies, `${mood.charAt(0).toUpperCase() + mood.slice(1)} - Enhanced Recommendations`);
       
       // Update performance stats
       setPerformanceStats({
         searchTime: Math.round(searchTime),
-        confidence: intelligentResult.confidence,
-        resultsCount: intelligentResult.movies.length,
-        strategy: 'intelligent-ml'
+        confidence: 85,
+        resultsCount: moodMovies.length,
+        strategy: 'enhanced-mood'
       });
       
-      console.log('✅ Intelligent Mood Analysis completed:', {
+      console.log('✅ Enhanced Mood Analysis completed:', {
         mood,
-        intent: intelligentResult.context.userIntent,
-        resultsFound: intelligentResult.movies.length,
-        confidence: intelligentResult.confidence,
-        reasoning: intelligentResult.reasoning
+        resultsFound: moodMovies.length,
+        confidence: 85,
+        searchTime: Math.round(searchTime) + 'ms'
       });
       
     } catch (error) {
-      console.error('Error getting intelligent mood recommendations:', error);
+      console.error('Error getting mood recommendations:', error);
       
       // Fallback to ensure the app doesn't break
-      try {
-        const fallbackMovies = await aiRecommendationEngine.getMoodBasedRecommendations(mood);
-        const fallbackResult: RecommendationResult = {
-          movies: fallbackMovies,
-          explanation: `Here are some ${mood} movies (using fallback system).`,
-          confidence: 70,
-          tags: [mood, 'fallback']
-        };
-        setResult(fallbackResult);
-        onMoviesFound(fallbackMovies, `${mood.charAt(0).toUpperCase() + mood.slice(1)} Movies`);
-      } catch (fallbackError) {
-        console.error('Fallback also failed:', fallbackError);
-      }
+      setResult({
+        movies: [],
+        explanation: `Sorry, couldn't find ${mood} movies right now. Please try again.`,
+        confidence: 0,
+        tags: [mood, 'error'],
+        searchMetadata: {
+          queryProcessingTime: 0,
+          searchStrategy: 'fallback',
+          totalResults: 0,
+          confidenceFactors: ['Mood search failed', 'Please try again'],
+          fallbackUsed: true,
+          aiModelUsed: 'fallback',
+          semanticMatchScore: 0
+        }
+      });
     } finally {
       setIsLoading(false);
     }
@@ -246,12 +229,12 @@ const AIRecommendations = ({ onMoviesFound }: AIRecommendationsProps) => {
           <span className="text-lg font-semibold gradient-text">AI Movie Discovery</span>
         </div>
         
-        <h2 className="text-3xl md:text-4xl font-black gradient-text glow-text font-orbitron">
-          Intelligent ML Movie Discovery Engine
+        <h2 className="text-3xl md:text-4xl font-black gradient-text glow-text">
+          Enhanced AI Movie Discovery
         </h2>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-inter">
-          Advanced Machine Learning algorithms that truly understand your mood and preferences. 
-          Intelligent genre filtering ensures perfect matches every time.
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Advanced AI algorithms that understand your mood and preferences. 
+          Smart filtering ensures perfect matches every time.
         </p>
         
         {/* Performance & Intelligence Indicators */}
@@ -279,7 +262,7 @@ const AIRecommendations = ({ onMoviesFound }: AIRecommendationsProps) => {
             placeholder="e.g., 'movie about a man who ages backwards' or 'TV show about serial killers' or 'that sci-fi film with the spinning hallway'"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="search-input w-full pl-6 pr-16 py-4 rounded-2xl text-foreground font-medium text-lg min-h-[60px] font-inter"
+            className="search-input w-full pl-6 pr-16 py-4 rounded-2xl text-foreground font-medium text-lg min-h-[60px]"
             disabled={isLoading}
           />
           <Button
@@ -322,7 +305,7 @@ const AIRecommendations = ({ onMoviesFound }: AIRecommendationsProps) => {
             variant="outline"
             onClick={() => handleMoodClick(item.mood)}
             disabled={isLoading}
-            className="bg-gradient-card backdrop-blur-md border-border/60 hover:border-primary/60 transition-all duration-300 font-inter"
+            className="bg-gradient-card backdrop-blur-md border-border/60 hover:border-primary/60 transition-all duration-300"
           >
             <span className="mr-2">{item.icon}</span>
             {item.label}

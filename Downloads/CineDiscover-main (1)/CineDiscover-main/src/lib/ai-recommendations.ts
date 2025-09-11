@@ -15,6 +15,15 @@ export interface RecommendationResult {
   explanation: string;
   confidence: number;
   tags: string[];
+  searchMetadata?: {
+    queryProcessingTime: number;
+    searchStrategy: string;
+    totalResults: number;
+    confidenceFactors: string[];
+    fallbackUsed: boolean;
+    aiModelUsed: string;
+    semanticMatchScore: number;
+  };
 }
 
 export interface UserProfile {
