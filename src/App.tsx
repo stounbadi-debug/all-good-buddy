@@ -7,6 +7,7 @@ import TrendIntelligence from '@/pages/TrendIntelligence'
 import ContentPerformance from '@/pages/ContentPerformance'
 import CreatorTools from '@/pages/CreatorTools'
 import StudioAnalytics from '@/pages/StudioAnalytics'
+import DiscoverClient from '@/components/pages/DiscoverClient'
 import DualNavigation from '@/components/DualNavigation'
 
 function App() {
@@ -15,7 +16,8 @@ function App() {
       <DualNavigation />
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/discover" element={<Index />} />
+        <Route path="/ai" element={<Index />} />
+        <Route path="/discover" element={<DiscoverClient />} />
         <Route path="/trend-intelligence" element={<TrendIntelligence />} />
         <Route path="/content-performance" element={<ContentPerformance />} />
         <Route path="/creator-tools" element={<CreatorTools />} />

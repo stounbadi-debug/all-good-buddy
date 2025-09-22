@@ -289,7 +289,9 @@ export default function DiscoverClient() {
             </TabsContent>
 
             <TabsContent value="ai" className="space-y-8">
-              <AIRecommendations onMoviesFound={handleAIMoviesFound} />
+              <div className="grid gap-8">
+                <AIRecommendations onMoviesFound={handleAIMoviesFound} />
+              </div>
             </TabsContent>
 
             <TabsContent value="search" className="space-y-8">
