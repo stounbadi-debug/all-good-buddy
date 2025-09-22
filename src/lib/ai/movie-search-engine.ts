@@ -1,6 +1,5 @@
 // Movie Search Engine - Unified Search System
 import { Movie, tmdbService } from '../tmdb';
-import { workingGeminiSearch } from '../working-gemini-search';
 import { AIRequest, AIResponse, professionalAICore } from './professional-ai-core';
 
 export class MovieSearchEngine {
@@ -14,30 +13,17 @@ export class MovieSearchEngine {
       let confidence = 80;
       let enginesUsed: string[] = [];
 
-      // Strategy 1: Try Gemini AI understanding first
-      try {
-        console.log('🧠 Attempting Gemini AI analysis...');
-        const geminiResult = await workingGeminiSearch.analyzeAndSearch(request.query);
-        
-        if (geminiResult.movies.length > 0) {
-          movies = geminiResult.movies;
-          explanation = geminiResult.explanation;
-          confidence = geminiResult.confidence;
-          enginesUsed.push('Gemini AI', 'TMDB');
-          console.log('✅ Gemini AI successful!');
-        }
-      } catch (error) {
-        console.log('⚠️ Gemini AI unavailable, using TMDB direct search');
-      }
-
-      // Strategy 2: Fallback to direct TMDB search
-      if (movies.length === 0) {
-        console.log('🔍 Using direct TMDB search...');
-        const tmdbResults = await tmdbService.searchMovies(request.query);
-        movies = tmdbResults.results.slice(0, 12);
-        explanation = `🔍 Found ${movies.length} movies matching "${request.query}"`;
-        enginesUsed.push('TMDB');
-      }
+      // Strategy: Use TMDB search with enhanced queries
+      console.log('🔍 Using TMDB search...');
+      
+      // Enhanced query processing
+      const enhancedQuery = this.enhanceQuery(request.query);
+      const tmdbResults = await tmdbService.searchMovies(enhancedQuery);
+      
+      movies = tmdbResults.results.slice(0, 12);
+      explanation = `🔍 Found ${movies.length} movies matching "${request.query}"`;
+      enginesUsed.push('TMDB Enhanced');
+      confidence = movies.length > 0 ? 85 : 70;
 
       // Enhance movies with professional scoring
       const enhancedMovies = this.enhanceMovies(movies);
@@ -63,6 +49,23 @@ export class MovieSearchEngine {
       console.error('❌ Movie search failed:', error);
       return professionalAICore.createFallbackResponse(request.query, Date.now() - startTime);
     }
+  }
+
+  private enhanceQuery(query: string): string {
+    // Basic query enhancement
+    const lowerQuery = query.toLowerCase();
+    
+    if (lowerQuery.includes('happy') || lowerQuery.includes('feel good')) {
+      return query + ' comedy feel good';
+    }
+    if (lowerQuery.includes('sad') || lowerQuery.includes('emotional')) {
+      return query + ' drama emotional';
+    }
+    if (lowerQuery.includes('exciting') || lowerQuery.includes('action')) {
+      return query + ' action adventure thriller';
+    }
+    
+    return query;
   }
 
   private enhanceMovies(movies: Movie[]): Movie[] {
@@ -97,11 +100,8 @@ export class MovieSearchEngine {
   private getProfessionalFeatures(enginesUsed: string[]): string[] {
     const features = ['Professional Search Engine', 'Smart Movie Analysis'];
     
-    if (enginesUsed.includes('Gemini AI')) {
-      features.push('AI Understanding', 'Intelligent Query Processing');
-    }
-    if (enginesUsed.includes('TMDB')) {
-      features.push('Comprehensive Database', 'Real-time Data');
+    if (enginesUsed.includes('TMDB Enhanced')) {
+      features.push('Enhanced Query Processing', 'Comprehensive Database', 'Real-time Data');
     }
     
     return features;

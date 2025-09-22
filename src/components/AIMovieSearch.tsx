@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { aiService } from '@/lib/ai/ai-service';
-import { AIResponse } from '@/lib/ai/professional-ai-core';
-import { Movie } from '@/lib/tmdb';
+import type { AIResponse } from '@/lib/ai/professional-ai-core';
+import type { Movie } from '@/lib/tmdb';
 
 export const AIMovieSearch = () => {
   const [query, setQuery] = useState('');
