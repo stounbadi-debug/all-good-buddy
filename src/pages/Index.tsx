@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Brain, Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AIMovieSearch } from "@/components/AIMovieSearch";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("discover");
@@ -58,10 +59,7 @@ const Index = () => {
             </TabsContent>
 
             <TabsContent value="ai" className="space-y-8">
-              <div className="text-center py-20">
-                <h2 className="text-3xl font-bold mb-4">AI Recommendations Coming Soon</h2>
-                <p className="text-muted-foreground">Advanced AI movie discovery features are being prepared.</p>
-              </div>
+              <AIMovieSearch />
             </TabsContent>
           </Tabs>
         </div>
