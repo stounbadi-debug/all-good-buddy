@@ -334,7 +334,7 @@ function parseLinkedInPublicProfile($, url, jsonLd, meta) {
 }
 
 // 2) IMDb comprehensive person page parser
-function parseImdbNamePage($, url) {
+async function parseImdbNamePage($, url) {
   console.log('🎬 Starting IMDB scraping for:', url);
   const result = { source: 'imdb' };
   
@@ -941,7 +941,7 @@ async function scrapePage(url) {
     const extracted = {};
 
     if (domainHints.isLinkedIn) Object.assign(extracted, parseLinkedInPublicProfile($, url, jsonLd, meta));
-    if (domainHints.isImdb) Object.assign(extracted, parseImdbNamePage($, url));
+    if (domainHints.isImdb) Object.assign(extracted, await parseImdbNamePage($, url));
     if (domainHints.isWikipedia) Object.assign(extracted, parseWikipediaPersonPage($, url));
 
     return { url, textContent, jsonLd, meta, domainHints, extracted };
