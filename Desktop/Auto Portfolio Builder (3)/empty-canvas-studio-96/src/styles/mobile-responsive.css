@@ -1,0 +1,213 @@
+/* Mobile Responsive Optimizations */
+/* Auto Portfolio Builder - Mobile-First Design */
+
+/* Touch-friendly minimum sizes */
+@media (max-width: 640px) {
+  /* Ensure all interactive elements are at least 44x44px (Apple HIG recommendation) */
+  button, 
+  a, 
+  input[type="button"], 
+  input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Optimize text inputs for mobile */
+  input[type="text"],
+  input[type="url"],
+  input[type="email"],
+  textarea {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Improve touch scrolling performance */
+  .overflow-y-auto,
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Hide hover effects on touch devices */
+  .hover-lift:active {
+    transform: scale(0.98);
+  }
+  
+  /* Optimize image loading for mobile */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Small phones (iPhone SE, etc.) - 320px to 374px */
+@media (max-width: 374px) {
+  /* Extra compact spacing */
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  /* Smaller text sizes */
+  h1 {
+    font-size: 1.5rem; /* 24px */
+  }
+  
+  h2 {
+    font-size: 1.25rem; /* 20px */
+  }
+  
+  h3 {
+    font-size: 1.125rem; /* 18px */
+  }
+}
+
+/* Standard phones - 375px to 767px */
+@media (min-width: 375px) and (max-width: 767px) {
+  /* Comfortable spacing for standard phones */
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* Tablets - 768px to 1023px */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Tablet-optimized layouts */
+  .container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* Desktop - 1024px to 1919px */
+@media (min-width: 1024px) and (max-width: 1919px) {
+  /* Standard desktop spacing */
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* Large Desktop / 4K - 1920px+ */
+@media (min-width: 1920px) {
+  /* Scale up for large screens */
+  .container {
+    max-width: 1536px;
+  }
+  
+  /* Larger base font size for better readability on large screens */
+  html {
+    font-size: 18px;
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Reduce vertical spacing in landscape mode on small devices */
+  .space-y-12 {
+    gap: 1.5rem !important;
+  }
+  
+  .space-y-8 {
+    gap: 1rem !important;
+  }
+}
+
+/* Dark mode optimizations for mobile */
+@media (prefers-color-scheme: dark) {
+  /* Ensure text is readable on small screens in dark mode */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  /* Increase border visibility */
+  .border {
+    border-width: 2px !important;
+  }
+  
+  /* Stronger shadows for depth perception */
+  .shadow-xl-premium {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  /* Optimize for PDF/print export */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Expand all content */
+  .line-clamp-4 {
+    -webkit-line-clamp: unset !important;
+  }
+  
+  /* Remove interactive elements */
+  button,
+  a {
+    pointer-events: none;
+  }
+  
+  /* Black and white optimization */
+  * {
+    color: #000 !important;
+    background: #fff !important;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .hover\:scale-105:hover {
+    transform: none;
+  }
+  
+  /* Larger tap targets */
+  button,
+  a {
+    padding: 0.75rem 1rem;
+  }
+  
+  /* Disable hover animations */
+  .group:hover .group-hover\:scale-110 {
+    transform: none;
+  }
+}
+
+/* Ultra-wide screens (21:9 and wider) */
+@media (min-aspect-ratio: 21/9) {
+  .container {
+    max-width: 80vw;
+  }
+}
+
+/* Folding phones and unusual aspect ratios */
+@media (min-width: 280px) and (max-width: 320px) {
+  /* Ultra-compact mode for folding phones */
+  .text-xl {
+    font-size: 1rem !important;
+  }
+  
+  .text-2xl {
+    font-size: 1.25rem !important;
+  }
+  
+  .p-8 {
+    padding: 1rem !important;
+  }
+}
+
